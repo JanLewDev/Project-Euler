@@ -4,47 +4,66 @@ using namespace std;
 #define size(a) (int)a.size()
 typedef long long ll;
 
+// ---------------- BigNum with arbitrary precision ---------------- //
 
 struct Decimal{
-    // before and after the decimal point
+
+    short sign;
     vector<short> before;
     vector<short> after;
 
-    vector<short> stringToDecimal(string s){
+    vector<short> stringToVector(const string& s){
         vector<short> ret;
         for(auto i : s) ret.push_back(i - '0');
         return ret;
     }
 
-    vector<string> parse_string(string num){
-        vector<string> ret;
+    void parse_string(string num){
+        sign = 1;
+        if(num[0] == '-'){
+            sign = -1;
+            num.erase(num.begin());
+        }
+
         while(size(num) && num[0] == '0') num.erase(num.begin());
         while(size(num) && num.back() == '0') num.pop_back();
 
         int found = (int)num.find('.');
         if(found == string::npos){
-            ret.push_back(num);
-            ret.push_back("");
+            before = stringToVector(num);
         }
         else{
-            ret.push_back(num.substr(0, found));
-            ret.push_back(num.substr(found + 1));
+            before = stringToVector(num.substr(0, found));
+            after = stringToVector(num.substr(found + 1));
         }
-        return ret;
     }
 
     Decimal() {}
-    Decimal(ll n) : before(stringToDecimal(to_string(n))), after({}) {}
-    Decimal(ll n, ll k) : before(stringToDecimal(to_string(n))), after(stringToDecimal(to_string(k))) {}
-    Decimal(ll n, vector<short> a) : before(stringToDecimal(to_string(n))), after(a) {}
+    Decimal(ll n) { parse_string(to_string(n)); }
+    Decimal(ll n, ll k) { parse_string(to_string(n) + "." + to_string(k)); }
     Decimal(vector<short> b, vector<short> a) : before(b), after(a) {}
-    Decimal(string num) : before(stringToDecimal(parse_string(num)[0])), after(stringToDecimal(parse_string(num)[1])) {}
+    Decimal(string num) { parse_string(num); }
 
     Decimal prettify(){
         while(size(before) > 1 && before[0] == 0) before.erase(before.begin());
         if(!size(before)) before.push_back(0);
         while(size(after) > 1 && after.back() == 0) after.pop_back();
         return *this;
+    }
+
+    void operator=(Decimal const& d){
+        sign = d.sign;
+        before = d.before;
+        after = d.after;
+    }
+
+    void operator -(){
+        sign *= -1;
+    }
+
+    Decimal abs(Decimal& d){
+        d.sign = 1;
+        return d;
     }
     
     Decimal operator+(Decimal const& d){
@@ -146,24 +165,20 @@ struct Decimal{
         return res;
     }
 
-    Decimal operator+=(Decimal const& d){
+    void operator+=(Decimal const& d){
         *this = *this + d;
-        return *this;
     }
 
-    Decimal operator-=(Decimal const& d){
+    void operator-=(Decimal const& d){
         *this = *this - d;
-        return *this;
     }
 
-    Decimal operator*=(Decimal const& d){
+    void operator*=(Decimal const& d){
         *this = *this * d;
-        return *this;
     }
 
-    Decimal operator^=(ll n){
+    void operator^=(ll n){
         *this = *this ^ n;
-        return *this;
     }
 
     bool operator==(Decimal const& d){
@@ -189,16 +204,39 @@ struct Decimal{
         return ret;
     }
 
-    int count_digits(){
+    int length(){
         return size(before) + size(after);
     }
 
     friend ostream& operator<<(ostream& os, const Decimal& d){
+        if(d.sign == -1) os << "-";
         for(auto i : d.before) os << i;
         if(size(d.after)){
             os << ".";
             for(auto i : d.after) os << i;
         }
         return os;
-    }   
+    }  
+
+    friend istream& operator>>(istream& stream, Decimal& d){
+        string s;
+        stream >> s;
+        d.parse_string(s);
+        return stream; 
+    }
 };
+
+
+
+int main(){
+    Decimal a("123.456");
+    Decimal b("789.012");
+    a += b;
+    cout << a << "\n";
+    Decimal c;
+    cin >> c;
+    cout << c << "\n";
+
+    return 0;
+
+}
