@@ -8,13 +8,13 @@ typedef long long ll;
 
 struct Decimal{
 
-    short sign;
+    int sign;
     vector<short> before;
     vector<short> after;
 
     vector<short> stringToVector(const string& s){
         vector<short> ret;
-        for(auto i : s) ret.push_back(i - '0');
+        for(auto i : s) ret.push_back((short)(i - '0'));
         return ret;
     }
 
@@ -51,78 +51,95 @@ struct Decimal{
         return *this;
     }
 
-    void operator=(Decimal const& d){
-        sign = d.sign;
-        before = d.before;
-        after = d.after;
+    void operator=(ll n){
+        *this = Decimal(n);
     }
 
-    void operator -(){
-        sign *= -1;
+    Decimal operator -() const {
+        Decimal res = *this;
+        res.sign *= -1;
+        return res;
     }
 
-    Decimal abs(Decimal& d){
-        d.sign = 1;
-        return d;
+    Decimal abs(Decimal const& d) const {
+        Decimal res = d;
+        res.sign = 1;
+        return res;
     }
+
     
-    Decimal operator+(Decimal const& d){
-        vector<short> bret, aret;
-        short carry = 0;
-        int n = size(after), k = size(d.after);
-        for(int i = max(n, k) - 1; i >= 0; i--){
-            short sum = carry;
-            if(i < n) sum += after[i];
-            if(i < k) sum += d.after[i];
-            aret.push_back(sum % 10);
-            carry = sum / 10;
+    Decimal operator+(Decimal const& d) const {
+        if(sign == d.sign) {
+            int n = size(after), k = size(d.after);
+            Decimal ret = (*this > d) ? *this : d;
+            short carry = 0;
+            ret.after.resize(max(n, k), 0);
+            for(int i = max(n, k) - 1; i >= 0; i--){
+                short sum = carry;
+                if(i < n) sum += after[i];
+                if(i < k) sum += d.after[i];
+                ret.after[i] = sum % 10;
+                carry = sum >= 10;
+            }
+            n = size(before), k = size(d.before);
+            for(int i = 0; i < max(n, k); i++){
+                short sum = carry;
+                if(i < n) sum += before[n-i-1];
+                if(i < k) sum += d.before[k-i-1];
+                ret.before[max(n, k)-i-1] = sum % 10;
+                carry = sum >= 10;
+            }
+            if(carry) ret.before.insert(ret.before.begin(), carry);
+            
+            return ret.prettify();
         }
-        reverse(aret.begin(), aret.end());
-        n = size(before), k = size(d.before);
-        for(int i = 0; i <= max(n, k) - 1; i++){
-            short sum = carry;
-            if(i < n) sum += before[n-i-1];
-            if(i < k) sum += d.before[k-i-1];
-            bret.push_back(sum % 10);
-            carry = sum / 10;
-        }
-        if(carry) bret.push_back(carry);
-        reverse(bret.begin(), bret.end());
-        // return the prettified version
-        return Decimal(bret, aret).prettify();
-    }    
+        return *this - (-d);
+    }   
 
-    Decimal operator-(Decimal const& d){
-        vector<short> bret, aret;
-        short carry = 0;
-        int n = size(after), k = size(d.after);
-        for(int i = max(n, k) - 1; i >= 0; i--){
-            short sum = carry;
-            if(i < n) sum += after[i];
-            if(i < k) sum -= d.after[i];
-            if(sum < 0){
-                sum += 10;
-                carry = -1;
+    Decimal operator+(ll n) const {
+        return *this + Decimal(n);
+    } 
+
+    Decimal operator-(Decimal const& d) const {
+        if(sign == d.sign){
+            if(abs(*this) >= abs(d)){ 
+                int n = size(after), k = size(d.after);
+                Decimal ret = *this;
+                ret.after.resize(max(n, k), 0);
+                short carry = 0;
+                for(int i = max(n, k) - 1; i >= 0; i--){
+                    short sum = carry;
+                    if(i < n) sum += after[i];
+                    if(i < k) sum -= d.after[i];
+                    if(sum < 0){
+                        sum += 10;
+                        carry = -1;
+                    } else carry = 0;
+                    ret.after[i] = sum;
+                }
+                n = size(before), k = size(d.before);
+                ret.before.resize(max(n, k), 0);
+                for(int i = 0; i < max(n, k); i++){
+                    short sum = carry;
+                    if(i < n) sum += before[n-i-1];
+                    if(i < k) sum -= d.before[k-i-1];
+                    if(sum < 0){
+                        sum += 10;
+                        carry = -1;
+                    }
+                    else carry = 0;
+                    ret.before[n-i-1] = sum;
+                }
+                
+                return ret.prettify();
             }
-            else carry = 0;
-            aret.push_back(sum);
+            return -(d - *this);
         }
-        reverse(aret.begin(), aret.end());
-        n = size(before), k = size(d.before);
-        for(int i = 0; i <= max(n, k) - 1; i++){
-            short sum = carry;
-            if(i < n) sum += before[n-i-1];
-            if(i < k) sum -= d.before[k-i-1];
-            if(sum < 0){
-                sum += 10;
-                carry = -1;
-            }
-            else carry = 0;
-            bret.push_back(sum);
-        }
-        reverse(bret.begin(), bret.end());
-        // return the prettified version
-        return Decimal(bret, aret).prettify();
+        return *this + (-d);
+    }
+
+    Decimal operator-(ll n) const {
+        return *this - Decimal(n);
     }
 
     Decimal operator*(Decimal const& d){
@@ -181,11 +198,11 @@ struct Decimal{
         *this = *this ^ n;
     }
 
-    bool operator==(Decimal const& d){
-        return before == d.before && after == d.after;
+    bool operator==(Decimal const& d) const {
+        return sign == d.sign && before == d.before && after == d.after;
     }
 
-    bool operator<(Decimal const& d){
+    bool operator<(Decimal const& d) const {
         if(size(before) != size(d.before)) return size(before) < size(d.before);
         for(int i = 0; i < size(before); i++){
             if(before[i] != d.before[i]) return before[i] < d.before[i];
@@ -195,6 +212,22 @@ struct Decimal{
             if(after[i] != d.after[i]) return after[i] < d.after[i];
         }
         return false;
+    }
+
+    bool operator>(Decimal const& d) const {
+        return d < *this;
+    }
+
+    bool operator<=(Decimal const& d) const {
+        return !(d < *this);
+    }
+
+    bool operator>=(Decimal const& d) const {
+        return !(*this < d);
+    }
+
+    bool operator!=(Decimal const& d) const {
+        return !(*this == d);
     }
 
     ll sum_of_digits(){
@@ -229,13 +262,12 @@ struct Decimal{
 
 
 int main(){
-    Decimal a("123.456");
-    Decimal b("789.012");
-    a += b;
-    cout << a << "\n";
-    Decimal c;
-    cin >> c;
-    cout << c << "\n";
+    while(1){
+        Decimal a, b;
+        cin >> a >> b;
+        cout << a + b << "\n";
+        cout << a - b << "\n";
+    }
 
     return 0;
 
