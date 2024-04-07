@@ -262,10 +262,10 @@ int main(){
     // }
     int n; //cin>>n;
     n = 100000;
-    BigNum essa = BigNum::factorial(n);
-    cout << essa << "\n";
-    cout << essa.length() << "\n";
-    cout << essa.sum_of_digits() << "\n";
+    BigNum a = BigNum::factorial(n);
+    cout << a << "\n";
+    cout << a.length() << "\n";
+    cout << a.sum_of_digits() << "\n";
 
     return 0;
 
