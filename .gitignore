@@ -1,6 +1,5 @@
 *
 !*.*
 !*/
+!Makefile
 *.exe
-Makefile
-test.cpp

@@ -1,3 +1,5 @@
 # Project Euler
 
-Here are my solutions to Project Euler problems in C++.
+Project Euler is a website with a collection of mathematical problems.
+
+I'm solving them using C++ to improve my skills.
