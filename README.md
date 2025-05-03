@@ -1,5 +1,5 @@
 # Project Euler
 
-Project Euler is a website with a collection of mathematical problems.
+Solving Project Euler problems.
 
-I'm solving them using C++ to improve my skills.
+[![Project Euler](https://projecteuler.net/profile/deadpoll.png)](https://projecteuler.net/)

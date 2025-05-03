@@ -1,5 +1,6 @@
-*
-!*.*
-!*/
-!Makefile
+# exclude binaries for the solutions
+**/p[0-9][0-9][0-9][0-9]
 *.exe
+
+# macos
+.DS_Store
