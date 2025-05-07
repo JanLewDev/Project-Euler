@@ -32,7 +32,7 @@ fn main() {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn first_10_digit_sum() {
+    fn longest_collatz_sequence() {
         assert_eq!(837799, super::solve(1000000));
     }
 }
