@@ -2,8 +2,9 @@
 
 [package]
 name = "euler_rust"
-version = "0.0.1"
+version = "0.1.0"
 edition = "2024"
 
 [dependencies]
 num-bigint = "0.4.6"
+num-integer = "0.1.46"
